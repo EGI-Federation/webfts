@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['provider'])) {
 }
 
 $oidc = $_SESSION['oidc'];
-
+$oidc->addScope('email');
 $oidc->addScope('openid');
 $oidc->addScope('offline_access');
 //TODO find a better way to add token-exchange for helmhoz AAI
