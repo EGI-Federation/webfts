@@ -70,6 +70,18 @@ class FTS3Client {
         ));
     }
 
+    public function swift_list($surl, $osprojectid, $ostoken) {
+        if($ostoken){
+            return $this->get("cs/remote_content/swift", array(
+                "surl" => joinURLs($surl),
+                "projectid" => joinURLs($osprojectid),
+            ), array("X-Auth-Token: $ostoken"));
+        }
+        return $this->get("cs/remote_content/swift", array(
+            "surl" => joinURLs($surl),
+            "projectid" => joinURLs($osprojectid),
+        ));
+    }
 
     public function jobs($dlg_id = null,
                          $fields = null,
@@ -99,9 +111,7 @@ class FTS3Client {
     }
 
     public function delete_job($job_id) {
-        return $this->post("jobs/$job_id", array(
-            "_method" => "delete"  // TODO Why not use HTTP verb DELETE?
-        ));
+        return $this->delete("jobs/$job_id");
     }
 
     public function job_info($job_id, $field) {
@@ -109,14 +119,14 @@ class FTS3Client {
     }
 
 
-    private function get($path, $data = null) {
+    private function get($path, $data = null, $headers = array()) {
         if ($data != null) {
             $path = $path . "?" . http_build_query($data);
         }
 
         error_log("cURL: GET $this->base_url/$path");
 
-        $c = $this->curl_init($path);
+        $c = $this->curl_init($path, $headers);
         return $this->curl_exec($c);
     }
 
@@ -125,6 +135,13 @@ class FTS3Client {
         $c = $this->curl_init($path, array("Content-Type: application/json"));
         curl_setopt($c, CURLOPT_POST, true);
         curl_setopt($c, CURLOPT_POSTFIELDS, json_encode($data));
+        return $this->curl_exec($c);
+    }
+
+    private function delete($path) {
+        error_log("cURL: DELETE $this->base_url/$path ");
+        $c = $this->curl_init($path, array("Content-Type: application/json"));
+        curl_setopt($c, CURLOPT_CUSTOMREQUEST, "DELETE");
         return $this->curl_exec($c);
     }
 

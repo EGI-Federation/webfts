@@ -12,7 +12,7 @@ var permissionNumberMeaning = {
 	    7 : 'rwx'
 	};
 
-function runTransfer(container, origFolder, destFolder, CSLeftSelect){
+function runTransfer(container, origFolder, destFolder, CSLeftSelect, sourceProjectId, destProjectId, sourceOSToken, destOSToken){
 	if (sessionStorage.remainingProxyLifetime && parseInt(sessionStorage.remainingProxyLifetime) < 3600*1000*2 ){//2 hours 
 		$("#warningTransferButton").click({c: container, o: origFolder, d: destFolder, s:CSLeftSelect}, function(e) {
 			executeTransfer(e.data.c, e.data.o, e.data.d, e.data.s);
@@ -25,12 +25,12 @@ function runTransfer(container, origFolder, destFolder, CSLeftSelect){
 					
 		$("#expirationModal").modal('show');
 	} else {
-		executeTransfer(container, origFolder, destFolder, CSLeftSelect);
+		executeTransfer(container, origFolder, destFolder, CSLeftSelect, sourceProjectId, destProjectId, sourceOSToken, destOSToken);
 	}	
 }
 
 
-function executeTransfer(container, origFolder, destFolder, CSLeftSelect){
+function executeTransfer(container, origFolder, destFolder, CSLeftSelect, sourceProjectId, destProjectId, sourceOSToken, destOSToken){
     hideUserReport();
     if (sessionStorage.leftCSIndex == 2) { // Local upload
         $.support.cors = true;
@@ -56,7 +56,7 @@ function executeTransfer(container, origFolder, destFolder, CSLeftSelect){
             if (optionSelected.selectedIndex == 1){ //Dropbox
                 runDataTransfer($('#delegation_id').val(), getCSDataTransfer(origFolder, destFolder, selectedFiles, optionSelected.selectedData.text.toLowerCase()));}
             else {
-                runDataTransfer($('#delegation_id').val(), getDataTransfer(origFolder, destFolder, selectedFiles));
+                runDataTransfer($('#delegation_id').val(), getDataTransfer(origFolder, destFolder, selectedFiles, sourceProjectId, destProjectId, sourceOSToken, destOSToken));
             }
 
         }
@@ -65,11 +65,40 @@ function executeTransfer(container, origFolder, destFolder, CSLeftSelect){
 }
 
 
-function getDataTransfer(origFolder, destFolder, selectedFiles) {
+function getDataTransfer(origFolder, destFolder, selectedFiles, sourceProjectId, destProjectId, sourceOSToken, destOSToken) {
 	
 	var theData = {};
         theData["files"] = [];
 	theData["params"] = {};
+
+	origSwift = document.getElementById(origFolder).value.startsWith('swift');
+	destSwift = document.getElementById(destFolder).value.startsWith('swift');
+	origToken = (document.getElementById(sourceOSToken).value).trim();
+	destToken = (document.getElementById(destOSToken).value).trim();
+	origId = (document.getElementById(sourceProjectId).value).trim();
+	destId = (document.getElementById(destProjectId).value).trim();
+	if (origSwift && destSwift){
+		theData["params"].os_project_id = origId+':'+destId;
+		if (origToken || destToken){
+			theData["params"].os_token = [];
+		}
+		if (origToken){
+			theData["params"].os_token.push(origId+':'+origToken);
+		}
+		if (destToken){
+			theData["params"].os_token.push(destId+':'+destToken);
+		}
+	} else if (origSwift) {
+		theData["params"].os_project_id = origId;
+		if (origToken){
+			theData["params"].os_token = [origId+':'+origToken];
+		}
+	} else if (destSwift) {
+		theData["params"].os_project_id = destId;
+		if (destToken){
+			theData["params"].os_token = [destId+':'+destToken];
+		}
+	}
 
 	for (var i=0; i<selectedFiles.length; i++){
 		var files = {};
@@ -181,9 +210,9 @@ function pad (str, max) {
 	return str.length < max ? pad("0" + str, max) : str;
 }
 
-function getNextFolderContent(endpointInput, container, containerTable, indicator, stateText, folder, filter){
+function getNextFolderContent(endpointInput, container, containerTable, indicator, stateText, folder, filter, projectId, OSToken){
 	setInputPath(endpointInput, folder);
-	getEPContent(endpointInput, container, containerTable, indicator, stateText, filter);	
+	getEPContent(endpointInput, container, containerTable, indicator, stateText, filter, projectId, OSToken);
 }
 
 function setInputPath(endpointInput, folder) {
@@ -195,9 +224,9 @@ function setInputPath(endpointInput, folder) {
 	}
 }
 
-function getPreviousFolderContent(endpointInput, container, containerTable, indicator, stateText, filter){
+function getPreviousFolderContent(endpointInput, container, containerTable, indicator, stateText, filter, projectId, OSToken){
 	$("#" + endpointInput).val(getPreviousUrl(($('#' + stateText).text()).trim()));
-	getEPContent(endpointInput, container, containerTable, indicator, stateText, filter);	
+	getEPContent(endpointInput, container, containerTable, indicator, stateText, filter, projectId, OSToken);
 }
 
 function getPreviousUrl(endpointUrl){
@@ -272,8 +301,17 @@ function loadFolder(endpointInput, container, containerTable, elements, indicato
 
 function getInitialRowContent(endpointInput, container, containerTable, indicator, stateText, filter){
 	if (getPreviousUrl(($('#' + endpointInput).val()).trim()) != null){
-		return "<tr title='../' value='previous' ondblclick=\"getPreviousFolderContent('" + endpointInput + "','" + container + "','" + containerTable + "','" + indicator + "','" + stateText + "','" + filter + "')\">" + 
+		return "<tr title='../' value='previous' ondblclick=\"getPreviousFolderContent('" + endpointInput + "','" + container + "','" + containerTable + "','" + indicator + "','" + stateText + "','" + filter + "')\">" +
 			   "<td><i class='glyphicon glyphicon-circle-arrow-up'/>&nbsp;..</td><td></td><td></td><td></td></tr>";
+	} else {
+		return null;
+	}
+}
+
+function getInitialRowSwift(endpointInput, container, containerTable, indicator, stateText, filter, projectId, OSToken){
+	if (getPreviousUrl(($('#' + endpointInput).val()).trim()) != null){
+		return "<tr title='../' value='previous' ondblclick=\"getPreviousFolderContent('" + endpointInput + "','" + container + "','" + containerTable + "','" + indicator + "','" + stateText + "','" + filter + "','" + projectId + "','" + OSToken + "')\">" +
+			"<td><i class='glyphicon glyphicon-circle-arrow-up'/>&nbsp;..</td><td></td><td></td><td></td></tr>";
 	} else {
 		return null;
 	}
@@ -341,12 +379,12 @@ function getSelected(container){
         return selectedList;
 }
 
-function getEPContent(endpointInput, container, containerTable, indicator, stateText, filter){	
+function getEPContent(endpointInput, container, containerTable, indicator, stateText, filter, projectId, OSToken){
 	hideUserReport();
 	$('#'+indicator).show();
 	$('#'+container).hide();
 	$('#'+filter).val('');
-	getEndpointContent(endpointInput, container, containerTable, indicator, stateText, filter);
+	getEndpointContent(endpointInput, container, containerTable, indicator, stateText, filter, projectId, OSToken);
 }
 
 function setButtonState(input, button){
@@ -715,10 +753,11 @@ function loadEPList(ep, availableURLs){
 	});
 }
 
-function getStorageOption(currentSelect, localUpload, loginDiv, loginForm, contentDiv, loginIndicator, CSName, inputTextbox, loadButton, container, containerTable, indicator, stateText, filter,side){
+function getStorageOption(currentSelect, localUpload, loginDiv, loginForm, contentDiv, loginIndicator, CSName, inputTextbox, loadButton, container, containerTable, indicator, stateText, filter,side, SwiftStorage){
 	$('#' + loginDiv).hide();
 	$('#' + localUpload).hide();
 	$('#' + contentDiv).show();
+	$('#' + SwiftStorage).hide();
 	
 	if (currentSelect.selectedIndex > 0){
 		if (side == "left") {
@@ -769,20 +808,67 @@ function getStorageOption(currentSelect, localUpload, loginDiv, loginForm, conte
 			$('#' + loadButton).click();
 			$("#" + stateText).text(($('#' + inputTextbox).val()).trim());
 		}
-	}  else {		
-		if ((getUrlVars()["service"] != null) || ($('#' + CSName).val() != "Grid SE")){
-			clearContentTable(containerTable, container, indicator, stateText);				
-			$('#' + inputTextbox).val('');
-			$('#' + inputTextbox).attr("placeholder", "Endpoint path");
-		}		
-		$('#' + inputTextbox).prop('readonly', false);
-		$('#' + loadButton).prop("disabled",false);
-		$('#lfcregistration').prop("disabled",false);
-                $('#checksum').prop("disabled",false);
-		$('#lfcendpoint').prop("disabled",false);
-		$('#leftRemoveCSAccessBtn').hide();
+	}  else {
+		if (currentSelect.selectedData.text==="Swift"){
+			$('#' + SwiftStorage).show();
+			$('#lfcregistration').prop("disabled",true);
+			$('#checksum').prop("disabled",true);
+			if (side === "left"){
+				$('#dmpanelleft').hide();
+			}
+			else {
+				$('#dmpanelRight').hide();
+			}
+
+		} else {
+			if ((getUrlVars()["service"] != null) || ($('#' + CSName).val() != "Grid SE")){
+				clearContentTable(containerTable, container, indicator, stateText);
+				$('#' + inputTextbox).val('');
+				$('#' + inputTextbox).attr("placeholder", "Endpoint path");
+			}
+			$('#' + inputTextbox).prop('readonly', false);
+			$('#' + loadButton).prop("disabled",false);
+			$('#lfcregistration').prop("disabled",false);
+			$('#checksum').prop("disabled",false);
+			$('#lfcendpoint').prop("disabled",false);
+			$('#leftRemoveCSAccessBtn').hide();
+		}
 	}
 	$('#' + CSName).val(currentSelect.selectedData.text.toLowerCase());
+}
+
+function setSwiftParams(projectId, idDiv, loginModal, origTokenDiv, modalTokenDiv){
+	$('#' + idDiv).val(projectId);
+	$('#' + modalTokenDiv).val(origTokenDiv);
+	$('#submitSwiftCreds').disable = false;
+	$('#loginModal').modal('show');
+}
+
+function setOSToken(storageName, username, password, projectId, tokenDiv){
+	$('#submitSwiftCreds').disable = true;
+	var theData = {};
+	theData["storage_name"] = storageName;
+	theData["username"] = username;
+	theData["password"] = password;
+	theData["project_id"] = projectId;
+	$.ajax({
+		url : 'swiftlogin.php',
+		type : "POST",
+		dataType : 'json',
+		data: theData,
+		xhrFields : {
+			withCredentials : true
+		},
+		success : function(data1) {
+			console.log(data1)
+			$('#' + tokenDiv).val(data1);
+			$('#loginModal').modal('hide');
+		},
+		error : function(jqXHR, textStatus, errorThrown) {
+			showError(jqXHR, textStatus, errorThrown, "Error retrieving OS token. "+ supportText);
+			$('#loginModal').modal('hide');
+		}
+	});
 }
 
 function getLoginCS(CSName, loginDiv, contentDiv, loginForm, loadingPanel, path, container, containerTable, indicator, stateText, filter, endpointInput){
@@ -943,3 +1029,75 @@ function getCSDataTransfer(origFolder, destFolder, selectedFiles, CSName) {
 	return theData;	
 }
 
+
+function loadSwiftFolder(endpointInput, container, containerTable, elements, indicator, stateText, filter, projectId, OSToken){
+	clearContentTable(containerTable, container, indicator, stateText);
+	var up = getInitialRowSwift(endpointInput, container, containerTable, indicator, stateText, filter, projectId, OSToken);
+	if (up != null){
+		var back_row = [];
+		back_row.push(up);
+		$('#' + containerTable +' > tbody:last').append(back_row.join(""));
+	}
+	$.each(elements, function(index, value){
+		var icon = "";
+		var t_row = [];
+		var mtime_td = "";
+		var size_td = "";
+		try {
+			var encodedFolder= encodeURI(value.name.slice(0,-1).trim());
+			var encodedFile = encodeURI(value.name);
+		} catch (error) {
+			return
+		}
+		var endpoint = $('#'+endpointInput).val();
+		if (endpoint.endsWith('/')){
+			endpoint = endpoint.slice(0,-1);
+		}
+
+		if (value.name.at(-1) === "/"){
+			if (value.name.substr(0, value.name.indexOf("/")) === endpoint.substr(endpoint.lastIndexOf("/")+1)){
+				return true;
+			}
+			icon ="glyphicon glyphicon-folder-close";
+			t_row.push("<tr title=\'folder\' class=\"unselectable\" value='" + encodedFolder + "' ondblclick=\"getNextFolderContent('" + endpointInput + "','" + container + "','" + containerTable + "','" + indicator + "','" + stateText + "','" + encodedFolder + "','" + filter + "','" + projectId + "','" + OSToken + "')\">");
+			t_row.push('<td title="' + encodedFolder + '"><i class="' + icon + '"/>&nbsp;' + getPrintableFileName(encodedFolder) + '</td>');
+		} else if (value.name.indexOf("/") !== -1) {
+			if (value.name.substr(0, value.name.indexOf("/")) === endpoint.substr(endpoint.lastIndexOf("/")+1)) {
+				icon ="glyphicon glyphicon-file";
+				filename = value.name.substr(value.name.indexOf("/") + 1)
+				t_row.push('<tr title=\'file\' value="' + filename + '">');
+				t_row.push('<td title="' + filename + '"><i class="' + icon + '"/>&nbsp;' + getPrintableFileName(filename) + '</td>')
+			}
+			else {
+				return true;
+			}
+		} else {
+				icon ="glyphicon glyphicon-file";
+				t_row.push('<tr title=\'file\' value="' + encodedFile + '">');
+				t_row.push('<td title="' + encodedFile + '"><i class="' + icon + '"/>&nbsp;' + getPrintableFileName(encodedFile) + '</td>');
+		}
+		$.each(value, function(e_index, e_value){
+			if (e_index == 'last_modified'){
+				mtime_td= '<td>' + e_value + '</td>';
+			} else if (e_index == 'bytes'){
+				if (value.name.at(-1) === "/"){
+					//The number of a folder means the number of elements. Not need to be converted
+					size_td = '<td id=' + e_value + '> - </td>';
+				}
+				else
+				{
+					size_td = '<td id=' + e_value + '>' + getReadableFileSizeString(e_value) + '</td>';
+				}
+			}
+		});
+
+		t_row.push('<td>&nbsp;-&nbsp;</td>');
+		t_row.push(mtime_td);
+		t_row.push(size_td);
+		t_row.push('</tr>');
+		$('#' + containerTable +' > tbody:last').append(t_row.join(""));
+	});
+	$("#" + stateText).text(($('#' + endpointInput).val()).trim());
+	$("#" + containerTable + " tbody").finderSelect("update");
+
+}

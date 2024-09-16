@@ -20,7 +20,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
     case 'POST':
     case 'DELETE':
-        if ($_SERVER['CONTENT_TYPE'] === 'application/json') {
+        if (array_key_exists('CONTENT_TYPE', $_SERVER) && $_SERVER['CONTENT_TYPE'] === 'application/json') {
             $INPUT = json_decode(file_get_contents('php://input'), true);
         } else {
             $INPUT = $_POST;
@@ -63,6 +63,17 @@ try {
             }
             break;
 
+        case 'cs':
+            switch ($_SERVER['REQUEST_METHOD']) {
+                case 'GET':
+                    $result = $fts->swift_list($INPUT['surl'], $INPUT['osprojectid'], $_SERVER['HTTP_X_AUTH_TOKEN']);
+                    break;
+                default:
+                    $error = 405;
+                    break;
+            }
+            break;
+
         case 'jobs':
             switch ($_SERVER['REQUEST_METHOD']) {
                 case 'GET':
@@ -92,6 +103,7 @@ try {
                     $result = $fts->submit_job($data);
                     break;
                 case 'DELETE':
+                    $result = $fts->delete_job($_SERVER['HTTP_JOBID']);
                     break;
                 default:
                     $error = 405;

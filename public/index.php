@@ -32,7 +32,7 @@
 <link rel="stylesheet" type="text/css" href="css/site-tour-styles/custom-site-tour.css">
 
 <!-- custom nav-bar styles -->
-<link rel="stylesheet" type="text/css" href="/css/nav-bar-custom/nav-bar-custom.css">
+<link rel="stylesheet" type="text/css" href="css/nav-bar-custom/nav-bar-custom.css">
 
 
 <!--Parallax scripts start-->
@@ -43,8 +43,8 @@
 <!--Parallax scripts ends-->
 
 <!-- Scroll to top -->
-<script type="text/javascript" src='/site-tour/scroll-to-top.js'></script>
-<script type="text/javascript" src='/js/disableScalability.js'></script>
+<script type="text/javascript" src='site-tour/scroll-to-top.js'></script>
+<script type="text/javascript" src='js/disableScalability.js'></script>
 
 
 
@@ -53,7 +53,7 @@
 <script src="js/jquery.validate.min.js"></script>
 
 <!-- Browser Compatibility styles -->
-<link rel="stylesheet" href="/paraFiles/css/base.css"/>
+<link rel="stylesheet" href="paraFiles/css/base.css"/>
 
 <!-- Browser Compatibility starts to apply different stylesheets-->
 <script type="text/javascript">

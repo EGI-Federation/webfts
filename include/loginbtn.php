@@ -3,7 +3,7 @@ $config = include('../config.php');
 ?>
 
 <div class="navbar-left btn-group">
-    <form method="post" action="/login.php">
+    <form method="post" action="/public/login.php">
         <button class="btn btn-primary dropdown-toggle pull-right padding-class-2"
                 type="button" data-toggle="dropdown">
             Login

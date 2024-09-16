@@ -45,7 +45,7 @@ try {
     $oidc->requestClientCredentialsToken();
 
     // TODO Dynamic return location
-    header("Location: /index.php");
+    header("Location: /public/index.php");
 }
 catch (OpenIDConnectClientException $e) {
     // TODO This message might reveal sensitive information

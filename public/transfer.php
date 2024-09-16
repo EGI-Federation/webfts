@@ -1,4 +1,4 @@
-<link href="/site-tour/introJs/introjs.css" rel="stylesheet">
+<link href="site-tour/introJs/introjs.css" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="css/site-tour-styles/custom-site-tour.css">
 
 <script>
@@ -33,13 +33,13 @@ $( document ).ready(function() {
 	});
 
 	var ddDataLeft = [
-	              {
-	                 text: "Grid SE",
-	                 value: 1,
-	                 selected: true,
-	                 description: "Grid Storage Element",
-	                 imageSrc: "img/grid_storage.png"
-	             },
+                 {
+                     text: "Swift",
+                     value: 1,
+                     selected: true,
+                     description: "Swift Object Store",
+                     imageSrc: "img/openstack-icon.png"
+                 },
 	         ];
 	         
 	//workaround to make the session loading work
@@ -51,7 +51,7 @@ $( document ).ready(function() {
            imagePosition: "left",
            selectText: "Select storage",
            onSelected: function (data) {
-           getStorageOption(data, 'leftStorageLocalUpload', 'leftStorageLogin', 'leftCSLoginForm', 'leftStorageContent', 'leftLoginIndicator', 'leftCSName', 'leftEndpoint', 'load-left', 'leftEndpointContent', 'leftEndpointContentTable', 'left-loading-indicator', 'left-ep-text', 'leftEpFilter','left');
+           getStorageOption(data, 'leftStorageLocalUpload', 'leftStorageLogin', 'leftCSLoginForm', 'leftStorageContent', 'leftLoginIndicator', 'leftCSName', 'leftEndpoint', 'load-left', 'leftEndpointContent', 'leftEndpointContentTable', 'left-loading-indicator', 'left-ep-text', 'leftEpFilter','left', 'leftSwiftStorage');
                $('#leftCSName').val(data.selectedData.text.toLowerCase());
 		if (setSession) {
                         sessionStorage.leftCSIndex=data.selectedIndex;
@@ -61,13 +61,13 @@ $( document ).ready(function() {
 
 
 	var ddDataRight = [
-	             {
-	                text: "Grid SE",
-                 	value: 1,
-		        selected: true,
-		        description: "Grid Storage Element",
-		        imageSrc: "img/grid_storage.png"
-		     },
+                    {
+                        text: "Swift",
+                        value: 1,
+                        selected: true,
+                        description: "Swift Object Store",
+                        imageSrc: "img/openstack-icon.png"
+                    },
 		        ];
 		
 	$('#rightStorageSelect').ddslick({
@@ -93,10 +93,10 @@ $( document ).ready(function() {
 					{ 
                                            alert("WebFTS could not retrieve your credentials to access CERNBox, are you a CERNBOX user?");
 					   return;
-					},	
-                		});	
-			}	
-        getStorageOption(data, 'leftStorageLocalUpload', 'rightStorageLogin', 'rightCSLoginForm', 'rightStorageContent', 'rightLoginIndicator', 'rightCSName', 'rightEndpoint', 'load-right', 'rightEndpointContent', 'rightEndpointContentTable', 'right-loading-indicator', 'right-ep-text', 'rightEpFilter','right');
+					},
+                		});
+			}
+        getStorageOption(data, 'leftStorageLocalUpload', 'rightStorageLogin', 'rightCSLoginForm', 'rightStorageContent', 'rightLoginIndicator', 'rightCSName', 'rightEndpoint', 'load-right', 'rightEndpointContent', 'rightEndpointContentTable', 'right-loading-indicator', 'right-ep-text', 'rightEpFilter','right', 'rightSwiftStorage');
 		   if (setSession) {
                        	sessionStorage.rightCSIndex=data.selectedIndex;
                	   }
@@ -149,19 +149,27 @@ $( document ).ready(function() {
 		 if ( parseInt(sessionStorage.leftCSIndex) ==1 ) {}
 		 else {
 			 $('#leftEndpoint').val(sessionStorage.seEndpointLeft);
-			 if (sessionStorage.seEndpointLeft !== "") {
-				$('#load-left').trigger("click");	
+			 if (sessionStorage.seEndpointLeft !== "" && !sessionStorage.seEndpointLeft.startsWith("swift")) {
+				$('#load-left').trigger("click");
 			 }
 	  	}
 	  }
 
 	 if (sessionStorage.seEndpointRight) {
 		 $('#rightEndpoint').val(sessionStorage.seEndpointRight);
-		 if (sessionStorage.seEndpointRight !== "") {
+		 if (sessionStorage.seEndpointRight !== "" && !sessionStorage.seEndpointRight.startsWith("swift")) {
                         $('#load-right').trigger("click");
                  }  
 	  }
 	}
+
+    if(sessionStorage.projectIdLeft) {
+        $('#exampleProjectId1').val(sessionStorage.projectIdLeft)
+    }
+
+    if(sessionStorage.projectIdRight) {
+        $('#exampleProjectId2').val(sessionStorage.projectIdRight)
+    }
 
 	//$('#leftStorageLogin').hide();
 
@@ -228,7 +236,8 @@ $("#uploadFiles").on("change", function(e){
 $(function(){
      $("#warning_modal_content").load("expirationWarningModal.html");
 	   $("#revoke_access_modal_content").load("revokeCSAccess.html");
-	   $("#datamanagement_modal_content").load("dataManagement.html"); 
+	   $("#datamanagement_modal_content").load("dataManagement.html");
+       $("#login_modal").load("swiftLoginModal.html");
 });
 
 
@@ -246,6 +255,13 @@ function setSEpath() {
 
 }
 
+function setProjectId(){
+    if (typeof(Storage)!=="undefined") {
+        sessionStorage.projectIdLeft = $('#exampleProjectId1').val();
+        sessionStorage.projectIdRight = $('#exampleProjectId2').val();
+    }
+}
+
 function saveCheckboxState() {
 	if (typeof(Storage)!=="undefined") {
 		sessionStorage.checksum = Boolean($('#checksum').prop('checked'));
@@ -261,7 +277,7 @@ function refreshFiles() {
                 getLoginCS( $('#leftCSName').val(), 'leftStorageLogin', 'leftStorageContent', 'leftCSLoginForm', 'leftLoginIndicator', $('#leftEndpoint').val(), 'leftEndpointContent', 'leftEndpointContentTable', 'left-loading-indicator', 'left-ep-text', 'leftEpFilter', 'leftEndpoint');
                  }
         else {
-                getEPContent('leftEndpoint', 'leftEndpointContent', 'leftEndpointContentTable', 'left-loading-indicator', 'left-ep-text', 'leftEpFilter');
+                getEPContent('leftEndpoint', 'leftEndpointContent', 'leftEndpointContentTable', 'left-loading-indicator', 'left-ep-text', 'leftEpFilter', 'exampleProjectId1', 'leftOSToken');
         }
 
 }
@@ -278,6 +294,7 @@ $('#checksum').popover();
 	<div id="warning_modal_content"></div>
 	<div id="datamanagement_modal_content"></div>
 	<div id="revoke_access_modal_content"></div>
+	<div id="login_modal"></div>
 	<?php
 		foreach($_SERVER as $h=>$v){
 			if ($h == "SSL_CLIENT_S_DN")
@@ -337,17 +354,35 @@ $('#checksum').popover();
 								class="pagination-centered" src="img/ajax-loader.gif" /></li>
 						</ul>
 					</div>
-				</div>	
+				</div>
+			</div>
+			<div id="leftSwiftStorage" class="panel">
+				<form>
+					<div class="form-group" id="left_project_id">
+						<label for="exampleProjectId1">OS Project ID</label>
+						<input type="text" class="form-control" id="exampleProjectId1" placeholder="Enter OS Project ID"
+                               onchange="setProjectId()">
+					</div>
+					<div class="form-group" id="left_os_token">
+						<label for="leftOSToken">OS Token</label>
+						<input type="text" class="form-control" id="leftOSToken" placeholder="Enter OS Token (OPTIONAL)">
+					</div>
+				</form>
+				<div>
+					<button type="button" class="btn link" onclick="setSwiftParams($('#exampleProjectId1').val(), 'swiftProjectId', 'loginModal', 'leftOSToken', 'swiftOSToken')">
+						Login to set OS token?
+					</button>
+				</div>
 			</div>
 			<div id="leftStorageContent">			
 				<div class="input-group" id="id4">
 					<input id="leftEndpoint" type="text" placeholder="Endpoint path"
 						class="form-control"
-						value="gsiftp://lxfsra10a01.cern.ch/dpm/cern.ch/home/" onchange="setSEpath()" > <span
+						value="swifts://object.cscs.ch" onchange="setSEpath()" > <span
 						class="input-group-btn">
 		
 						<button class="btn btn-primary" type="button" id="load-left"
-							onclick="getEPContent('leftEndpoint', 'leftEndpointContent', 'leftEndpointContentTable', 'left-loading-indicator', 'left-ep-text', 'leftEpFilter')">Load</button>
+							onclick="getEPContent('leftEndpoint', 'leftEndpointContent', 'leftEndpointContentTable', 'left-loading-indicator', 'left-ep-text', 'leftEpFilter', 'exampleProjectId1', 'leftOSToken')">Load</button>
 					</span>
 				</div>
 				<div class="panel panel-primary" id="dmpanelleft">
@@ -511,14 +546,14 @@ $('#checksum').popover();
 				data-position="bottom">
  -->				<button type="button" class="btn btn-primary btn-block"
 					name="transfer-from-left" id="transfer-from-left"
-					onclick="runTransfer('leftEndpointContentTable', 'leftEndpoint', 'rightEndpoint', 'leftStorageSelect')"
+					onclick="runTransfer('leftEndpointContentTable', 'leftEndpoint', 'rightEndpoint', 'leftStorageSelect', 'exampleProjectId1', 'exampleProjectId2', 'leftOSToken', 'rightOSToken')"
 					disabled>
 					<i class="glyphicon glyphicon-chevron-right"></i>
 				</button>
 				
 				<button type="button" class="btn btn-primary btn-block"
 					name="transfer-from-right" id="transfer-from-right"
-					onclick="runTransfer('rightEndpointContentTable', 'rightEndpoint', 'leftEndpoint', 'leftStorageSelect')"
+					onclick="runTransfer('rightEndpointContentTable', 'rightEndpoint', 'leftEndpoint', 'leftStorageSelect', 'exampleProjectId2', 'exampleProjectId1', 'rightOSToken', 'leftOSToken')"
 					disabled>
 					<i class="glyphicon glyphicon-chevron-left glyphicon-white"></i>
 				</button>
@@ -582,12 +617,30 @@ $('#checksum').popover();
 			data-position="bottom"> -->
 			<select id="rightStorageSelect"></select>
 			<div id="rightStorageLogin"></div>
+            <div id="rightSwiftStorage" class="panel">
+                <form>
+                    <div class="form-group" id="right_project_id">
+                        <label for="exampleProjectId2">OS Project ID</label>
+                        <input type="text" class="form-control" id="exampleProjectId2" placeholder="Enter OS Project ID"
+                               onchange="setProjectId()">
+                    </div>
+                    <div class="form-group" id="right_os_token">
+                        <label for="leftOSToken">OS Token</label>
+                        <input type="text" class="form-control" id="rightOSToken" placeholder="Enter OS Token (OPTIONAL)">
+                    </div>
+                </form>
+                <div>
+                    <button type="button" class="btn link" onclick="setSwiftParams($('#exampleProjectId2').val(), 'swiftProjectId', 'loginModal', 'rightOSToken', 'swiftOSToken')">
+                        Login to set OS token?
+                    </button>
+                </div>
+            </div>
 			<div id="rightStorageContent">
 				<div id="leftStorageContent">
 				<div class="input-group">
-					<input id="rightEndpoint" type="text" placeholder="Endpoint path" value="gsiftp://lxfsra10a01.cern.ch/dpm/cern.ch/home/"  onchange="setSEpath()"class="form-control"> <span class="input-group-btn">
+					<input id="rightEndpoint" type="text" placeholder="Endpoint path" value="swifts://object.cscs.ch"  onchange="setSEpath()"class="form-control"> <span class="input-group-btn">
 						<button class="btn btn-primary" type="button" id="load-right"
-							onclick="getEPContent('rightEndpoint', 'rightEndpointContent', 'rightEndpointContentTable', 'right-loading-indicator', 'right-ep-text', 'rightEpFilter')">Load</button>
+							onclick="getEPContent('rightEndpoint', 'rightEndpointContent', 'rightEndpointContentTable', 'right-loading-indicator', 'right-ep-text', 'rightEpFilter', 'exampleProjectId2', 'rightOSToken')">Load</button>
 					</span>
 				</div>
 				 <div class="panel panel-primary" id="dmpanelRight">
@@ -625,7 +678,7 @@ $('#checksum').popover();
 							</div>
 							<div class="btn-group" id="id8">
 								<button type="button" class="btn btn-sm"
-									onclick="getEPContent('rightEndpoint', 'rightEndpointContent', 'rightEndpointContentTable', 'right-loading-indicator', 'right-ep-text', 'rightEpFilter')">
+									onclick="getEPContent('rightEndpoint', 'rightEndpointContent', 'rightEndpointContentTable', 'right-loading-indicator', 'right-ep-text', 'rightEpFilter', 'exampleProjectId2', 'rightOSToken')">
 									<i class="glyphicon glyphicon-refresh" />&nbsp;Refresh
 								</button>
 							</div>
@@ -750,8 +803,8 @@ $('#checksum').popover();
 	</div>		
 </div>	
 
-<script type="text/javascript" src="/site-tour/introJs/intro.js"></script>
-<script type="text/javascript" src="/js/site-tourTransfer.js"></script>
+<script type="text/javascript" src="site-tour/introJs/intro.js"></script>
+<script type="text/javascript" src="js/site-tourTransfer.js"></script>
 
 <script type="text/javascript">
     if (RegExp('multipage', 'gi').test(window.location.search)) {

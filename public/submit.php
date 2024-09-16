@@ -17,8 +17,8 @@
 <link href="css/custom.css" rel="stylesheet">
 <link href="css/jquery-ui.min.css" rel="stylesheet">
 
-<link rel="stylesheet" href="/paraFiles/css/diffBrsStyles/submitBaseStyles.css"/>
-<link rel="stylesheet" type="text/css" href="/css/nav-bar-custom/nav-bar-custom.css">
+<link rel="stylesheet" href="paraFiles/css/diffBrsStyles/submitBaseStyles.css"/>
+<link rel="stylesheet" type="text/css" href="css/nav-bar-custom/nav-bar-custom.css">
 <link href="site-tour/introJs/introjs.css" rel="stylesheet">
 <script src="js/jquery.ddslick.min.js"></script>
 
@@ -92,6 +92,6 @@ $(function(){
                     <div id="includedContentTransfer"></div>
                 </div>
             </div>
-    <script type="text/javascript" src="/js/site-tourTransmissions.js"></script>
+    <script type="text/javascript" src="js/site-tourTransmissions.js"></script>
 </body>
 </html>

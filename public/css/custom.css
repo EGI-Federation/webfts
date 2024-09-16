@@ -24,3 +24,16 @@
 	height: 26;
 	width: 26;
 }
+
+button.link {
+    background:none;
+    border:none;
+    font-size: small;
+    color: grey;
+    padding: 0 0 0 0;
+    margin-top: -5%;
+}
+
+button.link:hover {
+    color: black;
+}

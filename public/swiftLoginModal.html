@@ -1,0 +1,53 @@
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-title text-center">
+                    <h4>Login</h4>
+                </div>
+                <div class="d-flex flex-column text-left">
+                    <form  method="post" action="/public/swiftlogin.php" id="swiftLoginForm">
+                        <div class="form-group">
+                            <label for="swiftStorage">Select Swift Object Store</label>
+                            <select class="form-control" id="swiftStorage" name="storageName">
+                                <option>CSCS</option>
+                                <option>BSC</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="username1">Username</label>
+                            <input type="text" name="username" class="form-control" id="username1" placeholder="Your username">
+                        </div>
+                        <div class="form-group">
+                            <label for="password1">Password</label>
+                            <input type="password" name="password" class="form-control" id="password1" autocomplete="off" placeholder="Your password">
+                        </div>
+                        <input type="hidden" name="projectId" id="swiftProjectId"/>
+                        <input type="hidden" id="swiftOSToken"/>
+                        <!-- <div class="form-group">
+                            <input type="submit" class="form-control" value="Submit">
+                        </div>-->
+                        <button type="button" class="btn btn-info btn-block" id="submitSwiftCreds" onclick="setOSToken($('#swiftStorage').val(), $('#username1').val(), $('#password1').val(), $('#swiftProjectId').val(), $('#swiftOSToken').val())">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get the input field
+    var input = document.getElementById("password1");
+
+    // Execute a function when the user releases a key on the keyboard
+    input.addEventListener("keyup", function(event) {
+        if (event.code === 'Enter') {
+            document.getElementById("submitSwiftCreds").click();
+        }
+    });
+</script>
